@@ -5,6 +5,10 @@ import uvicorn
 import face_recognition
 import json
 import os
+from celery_tasks.task01 import send_email
+from celery_tasks.task02 import send_msg
+from celery.result import AsyncResult
+from celery_tasks.celery import cel
 
 app = FastAPI()
 
@@ -22,11 +26,36 @@ def allowed_file(filename):
 async def root():
     return {"message": "caonima"}
 
+@app.get("/hello")
+async def hello():
+    # 立即告知celery去执行test_celery任务，并传入一个参数
+    result = send_email.delay('yuan')
+    print(result.id)
+    return {"result_id": result.id}
+
+@app.get("/fuck")
+async def fuck():
+    async_result = AsyncResult(id="1caa39c5-20a7-425b-85f9-0bb880a2cd33", app=cel)
+    if async_result.successful():
+        result = async_result.get()
+        print(result)
+    # result.forget() # 将结果删除,执行完成，结果不会自动删除
+    # async.revoke(terminate=True)  # 无论现在是什么时候，都要终止
+    # async.revoke(terminate=False) # 如果任务还没有开始执行呢，那么就可以终止。
+    elif async_result.failed():
+        print('执行失败')
+    elif async_result.status == 'PENDING':
+        print('任务等待中被执行')
+    elif async_result.status == 'RETRY':
+        print('任务异常后正在重试')
+    elif async_result.status == 'STARTED':
+        print('任务已经开始被执行')
+
 
 #接收一个名为 file 的参数，该参数的类型是 UploadFile，
 #我们使用 File 函数将其作为请求体中的文件进行解析。
 # File 函数的第一个参数是文件类型的默认值，... 表示必须传递该参数，否则将会返回错误响应。
-@app.post('/upload_image/', summary="图像上传接口")
+@app.post('/upload_image', summary="图像上传接口")
 async def upload_image(file: UploadFile = File(...)):
     # 先检查文件格式是否正确
     if False == allowed_file(file.filename):
@@ -92,6 +121,8 @@ def detect_faces_in_image(file_stream):
     # 将识别结果以json键值对的数据结构输出
     # 使用json.loads()方法将字符串转换为字典
     return "Success", "图片合格"
+
+
 
 
 if __name__ == '__main__':
