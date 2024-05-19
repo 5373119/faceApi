@@ -5,7 +5,7 @@ cel = Celery(
     broker='redis://127.0.0.1:6379/1',
     backend='redis://127.0.0.1:6379/2',
     # 包含以下两个任务文件，去相应的py文件中找任务，对多个任务做分类
-    include=['celery_tasks.task01', 'celery_tasks.task02'])
+    include=['celery_tasks.task_detect'])
 
 # 时区
 cel.conf.timezone = 'Asia/Shanghai'
