@@ -59,7 +59,7 @@ async def upload_image(file: UploadFile = File(...)):
     # 立即告知celery去执行celery任务，并传入一个参数
     result = detect_face.delay(file_path)
     print("result: ",result)
-    return {"task_id":result.id}
+    return {"code":"SUCCESS","data":result.id}
 
 
 
