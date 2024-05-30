@@ -41,9 +41,7 @@ async def upload_image(file: UploadFile = File(...)):
     # 确保上传目录存在
     try:
         # 存储到指定的目录  返回值为空
-        # random_path = generate_random_string(16)
-        # print("random_path:",random_path)
-        save_path = "E:\\test\\user_template\\"
+        save_path = "static/input/user/user_template/"
         print("save_path:",save_path)
         save_name = "0.png"
         print(os.makedirs(save_path, exist_ok=True))
