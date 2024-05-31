@@ -22,7 +22,7 @@ async def check_task_id(task_id: str = Path(..., title="task id")):
     # async.revoke(terminate=True)  # 无论现在是什么时候，都要终止
     # async.revoke(terminate=False) # 如果任务还没有开始执行呢，那么就可以终止。
     elif async_result.failed():
-        code = 'failed'
+        code = 'FAILED'
         msg = '执行失败'
     elif async_result.status == 'PENDING':
         code = 'PENDING'

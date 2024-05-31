@@ -36,7 +36,7 @@ async def upload_image(file: UploadFile = File(...)):
     print("file.filename:",file.filename)
     # 先检查文件格式是否正确
     if False == allowed_file(file.filename):
-        return {"code": "Error", "msg": "File format is wrong"}
+        return {"code": "ERROR", "msg": "File format is wrong"}
     #图片应该合格后再存储
     # 确保上传目录存在
     try:
@@ -53,7 +53,7 @@ async def upload_image(file: UploadFile = File(...)):
             buffer.write(content)
     except Exception as e:
         # 返回失败的响应
-        return {"code": "Error", "msg": str(e)}
+        return {"code": "ERROR", "msg": str(e)}
     # 立即告知celery去执行celery任务，并传入一个参数
     result = detect_face.delay(file_path)
     print("result: ",result)
