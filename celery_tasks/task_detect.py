@@ -35,7 +35,7 @@ def detect_faces_in_image(file_stream):
     # 使用json.loads()方法将字符串转换为字典
     return "SUCCESS", "图片合格"
 
-
+BASE_URL = 'http://120.78.187.229:8080/';
 
 @cel.task
 def detect_face(file_path):
@@ -49,5 +49,5 @@ def detect_face(file_path):
         finally:
             return code,msg,""
     # 如果成功，则返回存储路径    
-    return code,msg,file_path
+    return code,msg,BASE_URL+file_path
 
