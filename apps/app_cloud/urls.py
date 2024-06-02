@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Path
 from celery.result import AsyncResult
 from celery_tasks.celery import cel
+import os
 
 feedback = APIRouter()
 
@@ -38,3 +39,24 @@ async def check_task_id(task_id: str = Path(..., title="task id")):
         "msg": msg,
         "data": data,
     }
+
+
+# 删除用户模板
+@feedback.get("/delete/{image_id}")
+async def delete_image_id(image_id: int = Path(..., title="image id",ge=0,le=100)):
+    try:
+        # 先检查文件是否存在
+        delete_path = "static/input/user/user_template/"
+        print("delete_path:",delete_path)
+        save_name = str(image_id)+".png"
+        print(os.makedirs(delete_path, exist_ok=True))
+        # 确保上传目录存在
+        # 保存文件到服务器的指定目录并重命名
+        file_path = os.path.join(delete_path, save_name)
+        print("file_path:", file_path)
+        os.remove(file_path)
+        print(f"文件 {file_path} 已被删除。")
+    except Exception as e:
+        # 返回失败的响应
+        return {"code": "ERROR", "msg": str(e)}
+    return {"code":"SUCCESS","msg":"删除成功"}
