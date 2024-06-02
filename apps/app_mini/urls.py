@@ -1,4 +1,4 @@
-from fastapi import File, UploadFile, APIRouter
+from fastapi import File, UploadFile, APIRouter, Path
 from fastapi.responses import JSONResponse
 import os
 from celery_tasks.task_detect import detect_face
@@ -60,6 +60,38 @@ async def upload_image(file: UploadFile = File(...)):
     return {"code":"SUCCESS","data":result.id}
 
 
-
+#接收一个名为 file 的参数，该参数的类型是 UploadFile，
+#我们使用 File 函数将其作为请求体中的文件进行解析。
+# File 函数的第一个参数是文件类型的默认值，... 表示必须传递该参数，否则将会返回错误响应。
+@detect.post('/update/{image_id}', summary="图像更新接口")
+async def upload_image(image_id: int = Path(..., title="image id",ge=0,le=100),file: UploadFile = File(...)):
+    print("file.filename:",file.filename)
+    # 先检查文件格式是否正确
+    if False == allowed_file(file.filename):
+        return {"code": "ERROR", "msg": "File format is wrong"}
+    #图片应该合格后再存储
+    # 确保上传目录存在
+    try:
+        # 存储到指定的目录  返回值为空
+        temple_path = "static/input/user/user_template/temple/"
+        normal_path = "static/input/user/user_template/"
+        print("temple_path:",temple_path)
+        save_name = str(image_id)+".png"
+        print(os.makedirs(temple_path, exist_ok=True))
+        # 保存文件到服务器的指定目录并重命名
+        file_path = os.path.join(temple_path, save_name)
+        real_path = os.path.join(normal_path, save_name)
+        print("file_path:", file_path)
+        print("real_path:", real_path)
+        with open(file_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+    except Exception as e:
+        # 返回失败的响应
+        return {"code": "ERROR", "msg": str(e)}
+    # 立即告知celery去执行celery任务，并传入一个参数
+    result = detect_face.delay(file_path,real_path)
+    print("result: ",result)
+    return {"code":"SUCCESS","data":result.id}
 
 

@@ -1,6 +1,7 @@
 from celery_tasks.celery import cel
 import face_recognition
 import os
+import shutil
 
 # 人脸图片检测
 def detect_faces_in_image(file_stream):
@@ -38,7 +39,7 @@ def detect_faces_in_image(file_stream):
 BASE_URL = 'http://120.78.187.229:8080/';
 
 @cel.task
-def detect_face(file_path):
+def detect_face(file_path,real_path="add"):
     code, msg = detect_faces_in_image(file_path)
     if code == "ERROR":
         try:
@@ -48,6 +49,11 @@ def detect_face(file_path):
             print(f"无法删除文件: {e}")
         finally:
             return code,msg,""
-    # 如果成功，则返回存储路径    
-    return code,msg,BASE_URL+file_path
+    data = BASE_URL+file_path    
+    # 如果成功，则返回存储路径  
+    if real_path !="add":
+        shutil.copy2(file_path,real_path)
+        os.remove(file_path)
+        data = BASE_URL+real_path
+    return code,msg,data
 
