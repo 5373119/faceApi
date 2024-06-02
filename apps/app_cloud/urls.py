@@ -2,6 +2,7 @@ from fastapi import APIRouter, Path
 from celery.result import AsyncResult
 from celery_tasks.celery import cel
 import os
+import shutil
 
 feedback = APIRouter()
 
@@ -14,7 +15,7 @@ async def hello():
 # 获取任务队列的执行情况
 @feedback.get("/check/{task_id}")
 async def check_task_id(task_id: str = Path(..., title="task id")):
-    print("task_id is : ",task_id)
+    print("task_id is : ", task_id)
     async_result = AsyncResult(id=task_id, app=cel)
     data = ""
     if async_result.successful():
@@ -42,21 +43,20 @@ async def check_task_id(task_id: str = Path(..., title="task id")):
 
 
 # 删除用户模板
-@feedback.get("/delete/{image_id}")
-async def delete_image_id(image_id: int = Path(..., title="image id",ge=0,le=100)):
+@feedback.get("/delete/")
+async def delete_user_template():
     try:
         # 先检查文件是否存在
-        delete_path = "static/input/user/user_template/"
-        print("delete_path:",delete_path)
-        save_name = str(image_id)+".png"
-        print(os.makedirs(delete_path, exist_ok=True))
-        # 确保上传目录存在
-        # 保存文件到服务器的指定目录并重命名
-        file_path = os.path.join(delete_path, save_name)
-        print("file_path:", file_path)
-        os.remove(file_path)
-        print(f"文件 {file_path} 已被删除。")
+        delete_path = "static/input/user/"
+        print("delete_path:", delete_path)
+        template_name = "user_template/"
+        file_path = os.path.join(delete_path, template_name)
+        if os.path.exists(file_path):  # 检查路径是否存在
+            shutil.rmtree(file_path)
+            print("文件夹删除成功")
+        else:
+            print("文件夹不存在")
     except Exception as e:
         # 返回失败的响应
         return {"code": "ERROR", "msg": str(e)}
-    return {"code":"SUCCESS","msg":"删除成功"}
+    return {"code": "SUCCESS", "msg": "用户模板删除成功"}
