@@ -43,7 +43,7 @@ async def check_task_id(task_id: str = Path(..., title="task id")):
 
 
 # 删除用户模板
-@feedback.get("/delete/")
+@feedback.get("/delete")
 async def delete_user_template():
     try:
         # 先检查文件是否存在

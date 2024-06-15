@@ -3,6 +3,9 @@ import face_recognition
 import os
 import shutil
 
+tnum = 0
+
+
 # 人脸图片检测
 def detect_faces_in_image(file_stream):
     # 载入用户上传的图片
@@ -36,10 +39,12 @@ def detect_faces_in_image(file_stream):
     # 使用json.loads()方法将字符串转换为字典
     return "SUCCESS", "图片合格"
 
-BASE_URL = 'http://120.78.187.229:8080/';
+
+BASE_URL = 'http://120.78.187.229:8080/'
+
 
 @cel.task
-def detect_face(file_path,real_path="add"):
+def detect_face(file_path, real_path="add"):
     code, msg = detect_faces_in_image(file_path)
     if code == "ERROR":
         try:
@@ -48,12 +53,16 @@ def detect_face(file_path,real_path="add"):
         except OSError as e:
             print(f"无法删除文件: {e}")
         finally:
-            return code,msg,""
-    data = BASE_URL+file_path    
-    # 如果成功，则返回存储路径  
-    if real_path !="add":
-        shutil.copy2(file_path,real_path)
+            return code, msg, ""
+    data = BASE_URL + file_path
+    # 如果成功，则返回存储路径
+    # 如果是做更新，后面添加尾缀
+    if real_path != "add":
+        if tnum > 99:
+            tnum = 0
+        tnum = tnum + 1
+        suffix = "?t=" + str(tnum)
+        shutil.copy2(file_path, real_path)
         os.remove(file_path)
-        data = BASE_URL+real_path
-    return code,msg,data
-
+        data = BASE_URL + real_path + suffix
+    return code, msg, data
