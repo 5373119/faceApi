@@ -54,14 +54,15 @@ def detect_face(file_path, real_path="add"):
             print(f"无法删除文件: {e}")
         finally:
             return code, msg, ""
-    data = BASE_URL + file_path
+    global  tnum  
+    if tnum > 99:
+        tnum = 0
+    tnum = tnum + 1
+    suffix = "?t=" + str(tnum)
+    data = BASE_URL + file_path + suffix
     # 如果成功，则返回存储路径
     # 如果是做更新，后面添加尾缀
     if real_path != "add":
-        if tnum > 99:
-            tnum = 0
-        tnum = tnum + 1
-        suffix = "?t=" + str(tnum)
         shutil.copy2(file_path, real_path)
         os.remove(file_path)
         data = BASE_URL + real_path + suffix
